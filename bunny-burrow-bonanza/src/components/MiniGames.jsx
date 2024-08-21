@@ -261,11 +261,11 @@ const MiniGames = ({ onClose, onGameComplete }) => {
   const [activeGame, setActiveGame] = useState(null);
 
   const games = [
-    { name: 'Carrot Harvest', component: CarrotHarvest, reward: 'Extra carrots' },
-    { name: 'Nut Gathering', component: NutGathering, reward: 'Extra nuts' },
-    { name: 'Berry Picking', component: BerryPicking, reward: 'Extra berries' },
-    { name: 'Bunny Hop', component: BunnyHop, reward: 'Special resources' },
-    { name: 'Warren Maze', component: WarrenMaze, reward: 'Rare resources' },
+    { name: 'Carrot Harvest', component: CarrotHarvest, reward: 'Extra carrots', emoji: '🥕' },
+    { name: 'Nut Gathering', component: NutGathering, reward: 'Extra nuts', emoji: '🌰' },
+    { name: 'Berry Picking', component: BerryPicking, reward: 'Extra berries', emoji: '🫐' },
+    { name: 'Bunny Hop', component: BunnyHop, reward: 'Special resources', emoji: '🐰' },
+    { name: 'Warren Maze', component: WarrenMaze, reward: 'Rare resources', emoji: '🏰' },
   ];
 
   const handleGameComplete = (score) => {
@@ -274,30 +274,43 @@ const MiniGames = ({ onClose, onGameComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">Mini-Games</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-[#FFF8DC] p-6 rounded-xl max-w-md w-full max-h-[80vh] overflow-y-auto fuzzy-border">
+        <h2 className="text-3xl font-bold mb-4 text-[#8B4513] text-center">🎮 Fuzzy Fun Games</h2>
         {activeGame ? (
           <div>
             {React.createElement(games.find(game => game.name === activeGame).component, { onComplete: handleGameComplete })}
-            <Button className="mt-4" onClick={() => setActiveGame(null)}>Back to Games</Button>
+            <Button 
+              className="mt-4 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" 
+              onClick={() => setActiveGame(null)}
+            >
+              Back to Games
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
             {games.map((game, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div>
-                  <span className="font-bold">{game.name}</span>
-                  <p className="text-sm text-gray-600">Reward: {game.reward}</p>
+              <div key={index} className="bg-[#FFF5E6] p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-bold text-[#8B4513] flex items-center">
+                      {game.emoji} {game.name}
+                    </span>
+                    <p className="text-sm text-[#A0522D]">Reward: {game.reward}</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveGame(game.name)}
+                    className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9]"
+                  >
+                    Play
+                  </Button>
                 </div>
-                <Button variant="outline" onClick={() => setActiveGame(game.name)}>
-                  Play
-                </Button>
               </div>
             ))}
           </div>
         )}
-        <Button className="mt-6 w-full" onClick={onClose}>Close</Button>
+        <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={onClose}>Close Games</Button>
       </div>
     </div>
   );

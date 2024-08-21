@@ -1,14 +1,15 @@
+// Menu.jsx
 import React from 'react';
 import { Button } from '../components/ui/button';
 
 const Menu = ({ onMenuClick }) => {
   return (
-    <div className="flex justify-around bg-white rounded-lg p-2">
-      <Button variant="outline" onClick={() => onMenuClick('shop')}>Shop</Button>
-      <Button variant="outline" onClick={() => onMenuClick('habitats')}>Habitats</Button>
-      <Button variant="outline" onClick={() => onMenuClick('creatures')}>Creatures</Button>
-      <Button variant="outline" onClick={() => onMenuClick('miniGames')}>Mini-Games</Button>
-      <Button variant="outline" onClick={() => onMenuClick('settings')}>Settings</Button>
+    <div className="flex justify-around bg-[#8B4513] p-2 shadow-md">
+      <Button variant="ghost" onClick={() => onMenuClick('shop')} className="text-[#FFE4B5] hover:bg-[#A0522D]">Shop</Button>
+      <Button variant="ghost" onClick={() => onMenuClick('habitats')} className="text-[#FFE4B5] hover:bg-[#A0522D]">Habitats</Button>
+      <Button variant="ghost" onClick={() => onMenuClick('creatures')} className="text-[#FFE4B5] hover:bg-[#A0522D]">Creatures</Button>
+      <Button variant="ghost" onClick={() => onMenuClick('miniGames')} className="text-[#FFE4B5] hover:bg-[#A0522D]">Mini-Games</Button>
+      <Button variant="ghost" onClick={() => onMenuClick('settings')} className="text-[#FFE4B5] hover:bg-[#A0522D]">Settings</Button>
     </div>
   );
 };

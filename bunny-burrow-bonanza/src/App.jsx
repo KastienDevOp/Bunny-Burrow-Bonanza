@@ -192,6 +192,7 @@ export default function App() {
     }
   };
 
+  // Update the handleCreaturePurchase function
   const handleCreaturePurchase = (creature, cost) => {
     if (resources.carrots >= cost) {
       setResources(prevResources => ({
@@ -203,6 +204,9 @@ export default function App() {
         ...prevCreatures,
         [creature.name]: (prevCreatures[creature.name] || 0) + 1
       }));
+
+      // Update production rates when a new creature is purchased
+      updateProductionRates();
     } else {
       alert("Not enough carrots!");
     }
@@ -246,57 +250,67 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-b from-green-200 to-green-400 p-4">
-      <h1 className="text-4xl font-bold text-center mb-4">Bunny Burrow Bonanza</h1>
-      
-      {showAlert && (
-        <Alert variant="info" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Welcome to Bunny Burrow Bonanza!</AlertTitle>
-          <AlertDescription>
-            Start building your adorable rodent community. Collect resources, build habitats, and watch your creatures thrive!
-          </AlertDescription>
-          <Button variant="outline" onClick={() => setShowAlert(false)} className="mt-2">
-            Got it!
-          </Button>
-        </Alert>
-      )}
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-[#FFE4B5] to-[#FFB6C1] font-fredoka flex flex-col">
+      <header className="p-4 bg-[#8B4513] text-[#FFE4B5] shadow-md">
+        <h1 className="text-4xl font-bold text-center drop-shadow-lg">
+          🐰 Bunny Burrow Bonanza 🐿️
+        </h1>
+      </header>
 
-      <ResourceBar resources={resources} onResourceClick={handleResourceClick} />
-      <MainScreen purchasedHabitats={purchasedHabitats} purchasedCreatures={purchasedCreatures} />
-      <Menu onMenuClick={handleMenuClick} />
+      <main className="flex-grow flex flex-col overflow-hidden">
+        <ResourceBar resources={resources} onResourceClick={handleResourceClick} />
+        
+        <div className="flex-grow overflow-auto p-4">
+          <MainScreen purchasedHabitats={purchasedHabitats} purchasedCreatures={purchasedCreatures} />
+        </div>
 
-      {activeComponent === 'shop' && (
-        <Shop 
-          onClose={handleCloseComponent} 
-          onPurchase={handlePurchase} 
-          resources={resources}
-          shopItems={shopItems}
-        />
-      )}
-      {activeComponent === 'habitats' && (
-        <Habitats 
-          onClose={handleCloseComponent} 
-          onPurchase={handleHabitatPurchase} 
-          resources={resources} 
-          purchasedHabitats={purchasedHabitats}
-        />
-      )}
-      {activeComponent === 'creatures' && (
-        <Creatures 
-          onClose={handleCloseComponent} 
-          onPurchase={handleCreaturePurchase} 
-          resources={resources} 
-          purchasedCreatures={purchasedCreatures}
-        />
-      )}
-      {activeComponent === 'miniGames' && (
-        <MiniGames 
-          onClose={handleCloseComponent}
-          onGameComplete={handleGameComplete}
-        />
-      )}
-      {activeComponent === 'settings' && <Settings onClose={handleCloseComponent} />}
+        {showAlert && (
+          <Alert variant="info" className="m-4 fuzzy-border bg-[#FFF8DC] border-[#DEB887] text-[#8B4513]">
+            <AlertCircle className="h-5 w-5 text-[#FF6347]" />
+            <AlertTitle className="text-lg font-semibold">Welcome to Bunny Burrow Bonanza!</AlertTitle>
+            <AlertDescription className="text-[#A0522D]">
+              Start building your adorable rodent community. Collect resources, build habitats, and watch your furry friends thrive!
+            </AlertDescription>
+            <Button variant="outline" onClick={() => setShowAlert(false)} className="mt-2 bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9]">
+              Let's get fuzzy!
+            </Button>
+          </Alert>
+        )}
+
+        <Menu onMenuClick={handleMenuClick} />
+
+        {activeComponent === 'shop' && (
+          <Shop 
+            onClose={handleCloseComponent} 
+            onPurchase={handlePurchase} 
+            resources={resources}
+            shopItems={shopItems}
+          />
+        )}
+        {activeComponent === 'habitats' && (
+          <Habitats 
+            onClose={handleCloseComponent} 
+            onPurchase={handleHabitatPurchase} 
+            resources={resources} 
+            purchasedHabitats={purchasedHabitats}
+          />
+        )}
+        {activeComponent === 'creatures' && (
+          <Creatures 
+            onClose={handleCloseComponent} 
+            onPurchase={handleCreaturePurchase} 
+            resources={resources} 
+            purchasedCreatures={purchasedCreatures}
+          />
+        )}
+        {activeComponent === 'miniGames' && (
+          <MiniGames 
+            onClose={handleCloseComponent}
+            onGameComplete={handleGameComplete}
+          />
+        )}
+        {activeComponent === 'settings' && <Settings onClose={handleCloseComponent} />}
+      </main>
     </div>
   );
 }
