@@ -1,3 +1,6 @@
+To add the images of your game to the README, you can include the images using the Markdown syntax for images. Here’s how you can modify your README to include `StartGame.png` and `Gameplay.png`:
+
+```markdown
 # Bunny Burrow Bonanza
 
 ![Bunny Burrow Bonanza Logo](bunnos.png)
@@ -7,6 +10,14 @@
 Bunny Burrow Bonanza is an enchanting idle game where you manage a thriving community of adorable rabbits and other furry rodents. Your goal is to create a self-sustaining ecosystem where these cute creatures can live, play, and multiply. Collect resources like carrots, berries, and nuts to feed and care for your creatures. Build and upgrade habitats such as burrows, treehouses, and nests to accommodate different species. Breed and evolve your creatures to unlock new species and improve resource production.
 
 Engage in mini-games and seasonal events to keep the gameplay fresh and exciting. Visit friends' burrows, trade resources, and compete in leaderboards to see who has the most advanced and cutest community. With its charming visuals and strategic gameplay, Bunny Burrow Bonanza offers a delightful experience for players of all ages.
+
+## Screenshots
+
+### Start Screen
+![Start Screen](StartGame.png)
+
+### Gameplay
+![Gameplay](Gameplay.png)
 
 ## Features
 
