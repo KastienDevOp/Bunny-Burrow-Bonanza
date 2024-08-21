@@ -42,7 +42,7 @@ const ResourceCategory = ({ category, resources, emojis, onResourceClick }) => {
 
 const ResourceBar = ({ resources, onResourceClick }) => {
   const resourceCategories = {
-    'Crops': ['nuts', 'berries', 'potatoes', 'tomatoes', 'corn', 'pumpkins', 'apples', 'watermelons', 'strawberries'],
+    'Crops': ['carrots', 'nuts', 'berries', 'potatoes', 'tomatoes', 'corn', 'pumpkins', 'apples', 'watermelons', 'strawberries'],
     'Vegetables': ['cucumbers', 'beets', 'spinach', 'lettuce', 'radishes', 'onions', 'garlic', 'peas', 'beans', 'chilis', 'eggplants', 'broccoli', 'cabbage', 'cauliflower', 'zucchini', 'sweetPotatoes'],
     'Special': ['specialResources', 'rareResources'],
     'Attributes': ['happiness', 'luck', 'time', 'magic']

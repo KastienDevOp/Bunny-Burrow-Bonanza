@@ -21,6 +21,26 @@ const INITIAL_RESOURCES = {
   potatoes: 0,
   tomatoes: 0,
   corn: 0,
+  pumpkins: 0,
+  apples: 0,
+  watermelons: 0,
+  strawberries: 0,
+  cucumbers: 0,
+  beets: 0,
+  spinach: 0,
+  lettuce: 0,
+  radishes: 0,
+  onions: 0,
+  garlic: 0,
+  peas: 0,
+  beans: 0,
+  chilis: 0,
+  eggplants: 0,
+  broccoli: 0,
+  cabbage: 0,
+  cauliflower: 0,
+  zucchini: 0,
+  sweetPotatoes: 0,
   specialResources: 0,
   rareResources: 0,
   happiness: 0,
@@ -36,6 +56,26 @@ const INITIAL_PRODUCTION_RATES = {
   potatoes: 0.4,
   tomatoes: 0.25,
   corn: 0.35,
+  pumpkins: 0.2,
+  apples: 0.15,
+  watermelons: 0.1,
+  strawberries: 0.2,
+  cucumbers: 0.3,
+  beets: 0.25,
+  spinach: 0.2,
+  lettuce: 0.3,
+  radishes: 0.25,
+  onions: 0.2,
+  garlic: 0.15,
+  peas: 0.3,
+  beans: 0.25,
+  chilis: 0.2,
+  eggplants: 0.15,
+  broccoli: 0.2,
+  cabbage: 0.25,
+  cauliflower: 0.2,
+  zucchini: 0.3,
+  sweetPotatoes: 0.25,
   specialResources: 0.1,
   rareResources: 0.01,
   happiness: 0.1,
@@ -112,29 +152,84 @@ export default function App() {
 
   const { user, isLoading } = useAuth();
 
+  const handleExportData = async () => {
+    try {
+      await api.exportData();
+      alert('Data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Failed to export data. Please try again.');
+    }
+  };
+
+  const handleImportData = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          await api.importData(e.target.result);
+          alert('Data imported successfully!');
+          // Reload the game state after import
+          if (user) {
+            const loadedState = await api.loadGameState(user.username);
+            if (loadedState) {
+              setResources(loadedState.resources);
+              setProductionRates(loadedState.productionRates);
+              setShopItems(loadedState.shopItems);
+              setPurchasedHabitats(loadedState.purchasedHabitats);
+              setPurchasedCreatures(loadedState.purchasedCreatures);
+              setHabitatOrder(loadedState.habitatOrder);
+              // Update any other state that was loaded
+            }
+          }
+        } catch (error) {
+          console.error('Error importing data:', error);
+          alert(`Failed to import data: ${error.message}. Please try again.`);
+        }
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        alert('Failed to read the import file. Please try again.');
+      };
+      reader.readAsText(file);
+    }
+  };
+
   // Function to save game state
-  const saveGameState = useCallback((state) => {
+  const saveGameState = useCallback(async (state) => {
     if (user) {
-      // In a real app, this would be an API call to save the state to a backend
-      localStorage.setItem(`gameState_${user.username}`, JSON.stringify(state));
-      console.log('Game state saved');
+      try {
+        await api.saveGameState(user.username, state);
+        console.log('Game state saved');
+      } catch (error) {
+        console.error('Error saving game state:', error);
+      }
     }
   }, [user]);
 
   // Load game state on login
   useEffect(() => {
-    if (user) {
-      const savedState = localStorage.getItem(`gameState_${user.username}`);
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        setResources(parsedState.resources);
-        setProductionRates(parsedState.productionRates);
-        setShopItems(parsedState.shopItems);
-        setPurchasedHabitats(parsedState.purchasedHabitats);
-        setPurchasedCreatures(parsedState.purchasedCreatures);
-        setHabitatOrder(parsedState.habitatOrder);
+    const loadGameState = async () => {
+      if (user) {
+        try {
+          const loadedState = await api.loadGameState(user.username);
+          if (loadedState) {
+            setResources(loadedState.resources);
+            setProductionRates(loadedState.productionRates);
+            setShopItems(loadedState.shopItems);
+            setPurchasedHabitats(loadedState.purchasedHabitats);
+            setPurchasedCreatures(loadedState.purchasedCreatures);
+            setHabitatOrder(loadedState.habitatOrder);
+            // You might want to add any other state that needs to be loaded here
+          }
+        } catch (error) {
+          console.error('Error loading game state:', error);
+        }
       }
-    }
+    };
+
+    loadGameState();
   }, [user]);
 
   // Auto-save game state
@@ -145,9 +240,24 @@ export default function App() {
     purchasedHabitats,
     purchasedCreatures,
     habitatOrder,
+    // Add any other state that needs to be saved here
   };
 
   useAutoSave(gameState, saveGameState);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setResources(prevResources => {
+        const newResources = { ...prevResources };
+        Object.keys(productionRates).forEach(resource => {
+          newResources[resource] += productionRates[resource];
+        });
+        return newResources;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [productionRates]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -327,6 +437,15 @@ export default function App() {
         reward = Math.floor(score * 0.2);
         rewardType = 'rareResources';
         break;
+      case 'Creature Care':
+        reward = Math.floor(score * 0.3);
+        rewardType = 'happiness';
+        break;
+      case 'Resource Rush':
+        const resourceTypes = Object.keys(INITIAL_RESOURCES);
+        rewardType = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
+        reward = Math.floor(score * 0.5);
+        break;
       default:
         break;
     }
@@ -364,12 +483,11 @@ export default function App() {
         </div>
 
         {/* Creature Count Section */}
-        <div className="bg-[#3A5F5F] p-4 mx-4 mb-4 rounded-xl">
-          <h3 className="text-xl font-bold mb-2 text-[#FFE4B5]">Your Fuzzy Friends</h3>
+        <div className="bg-[#3A5F5F] p-2 mx-4 mb-3 rounded-xl">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
             {Object.entries(purchasedCreatures).map(([creatureName, count]) => (
               count > 0 && (
-                <div key={creatureName} className="bg-[#4A7F7F] p-2 rounded-lg text-[#FFE4B5] flex flex-col items-center justify-center">
+                <div key={creatureName} className="bg-[#4A7F7F] p-1 rounded-lg text-[#FFE4B5] flex flex-col items-center justify-center">
                   <span className="text-2xl" title={creatureName}>{CREATURE_EMOJIS[creatureName] || '🐾'}</span>
                   <span className="font-bold">{count}</span>
                 </div>
@@ -432,8 +550,9 @@ export default function App() {
             onSaveSettings={(newSettings) => {
               // Handle saving settings
               console.log('Saving settings:', newSettings);
-              // You might want to update some state or trigger some actions based on the new settings
             }}
+            onExportData={handleExportData}
+            onImportData={handleImportData}
           />
         )}
       </main>

@@ -19,7 +19,7 @@ const SETTINGS = {
   ],
 };
 
-const Settings = ({ onClose, onSaveSettings }) => {
+const Settings = ({ onClose, onSaveSettings, onExportData, onImportData }) => {
   const [activeCategory, setActiveCategory] = useState('Audio');
   const [settingsState, setSettingsState] = useState(() => {
     const initialState = {};
@@ -70,11 +70,12 @@ const Settings = ({ onClose, onSaveSettings }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-[#FFF8DC] p-6 rounded-xl max-w-2xl w-full fuzzy-border">
+      <div className="bg-[#FFF8DC] p-6 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto fuzzy-border">
         <h2 className="text-3xl font-bold mb-4 text-[#8B4513] text-center">⚙️ Cozy Settings</h2>
         
         {/* User Authentication Section */}
         <div className="mb-6 p-4 bg-[#FFF5E6] rounded-lg">
+          <h3 className="text-xl font-semibold mb-2 text-[#8B4513]">User Account</h3>
           {user ? (
             <div>
               <p className="mb-2 text-[#8B4513]">Logged in as: {user.username}</p>
@@ -110,7 +111,26 @@ const Settings = ({ onClose, onSaveSettings }) => {
           )}
         </div>
 
-        {/* Existing Settings */}
+        {/* Data Export/Import Section */}
+        <div className="mb-6 p-4 bg-[#FFF5E6] rounded-lg">
+          <h3 className="text-xl font-semibold mb-2 text-[#8B4513]">Data Management</h3>
+          <div className="flex justify-between">
+            <Button onClick={onExportData} className="bg-[#DEB887] text-white hover:bg-[#D2691E]">
+              Export Data
+            </Button>
+            <label className="bg-[#DEB887] text-white hover:bg-[#D2691E] px-4 py-2 rounded-md cursor-pointer">
+              Import Data
+              <input
+                type="file"
+                accept=".json"
+                onChange={onImportData}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Game Settings */}
         <div className="mb-4">
           {Object.keys(SETTINGS).map(category => (
             <Button
@@ -157,8 +177,9 @@ const Settings = ({ onClose, onSaveSettings }) => {
               )}
             </div>
           ))}
-          </div>
+        </div>
         <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={handleSaveSettings}>Save Settings</Button>
+        <Button className="mt-2 w-full bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9]" onClick={onClose}>Close Settings</Button>
       </div>
     </div>
   );

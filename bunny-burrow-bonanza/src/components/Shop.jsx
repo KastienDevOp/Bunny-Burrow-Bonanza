@@ -252,38 +252,34 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
                 <span className="text-xs text-[#CD853F]">
                   (Owned: {count})
                 </span>
+
+                {/* Shopping cart for the current item */}
+                {cart[item.name] > 0 && (
+                    <div className="mt-2 bg-[#FFEFD5] p-2 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span>{item.name} x{cart[item.name]}</span>
+                        <div>
+                          <Button
+                            variant="outline"
+                            onClick={() => removeFromCart(item.name)}
+                            className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] px-2 py-1 mr-2"
+                          >
+                            Remove
+                          </Button>
+                          <Button
+                            onClick={() => handlePurchase(item.name)}
+                            className="bg-[#8B4513] text-white hover:bg-[#A0522D]"
+                          >
+                            Purchase ({cart[item.name] * cost}                             🥕)
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </div>
             );
           })}
         </div>
-
-        {/* Shopping cart */}
-        {Object.keys(cart).length > 0 && (
-          <div className="mt-6 bg-[#FFEFD5] p-4 rounded-lg">
-            <h3 className="font-bold mb-2 text-[#8B4513]">Shopping Cart:</h3>
-            {Object.entries(cart).map(([itemName, quantity]) => (
-              <div key={itemName} className="flex justify-between items-center mb-2">
-                <span>{itemName} x{quantity}</span>
-                <Button
-                  variant="outline"
-                  onClick={() => removeFromCart(itemName)}
-                  className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] px-2 py-1"
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <div className="flex justify-between items-center mt-4">
-              <span className="font-bold">Total Cost: {getTotalCost()} 🥕</span>
-              <Button
-                onClick={handlePurchase}
-                className="bg-[#8B4513] text-white hover:bg-[#A0522D]"
-              >
-                Purchase
-              </Button>
-            </div>
-          </div>
-        )}
 
         <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={onClose}>Close Shop</Button>
       </div>
@@ -292,3 +288,4 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
 };
 
 export default Shop;
+
