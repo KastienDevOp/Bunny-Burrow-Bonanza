@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './components/ui/alert';
 import { Button } from './components/ui/button';
@@ -10,6 +10,9 @@ import Habitats from './components/Habitats';
 import Creatures from './components/Creatures';
 import MiniGames from './components/MiniGames';
 import Settings from './components/Settings';
+import useAuth from './hooks/useAuth';
+import useAutoSave from './hooks/useAutoSave';
+import api from './utils/api';
 
 const INITIAL_RESOURCES = {
   carrots: 1000,
@@ -39,6 +42,20 @@ const INITIAL_PRODUCTION_RATES = {
   luck: 0.02,
   time: 0.03,
   magic: 0.04,
+};
+
+const CREATURE_EMOJIS = {
+  'Common Bunny': '🐰',
+  'Nutty Squirrel': '🐿️',
+  'Berry Fox': '🦊',
+  'Magic Hare': '🐇✨',
+  'Golden Rabbit': '🐰✨',
+  'Resource Raccoon': '🦝',
+  'Crystal Deer': '🦌💎',
+  'Rainbow Unicorn': '🦄',
+  'Phoenix Rabbit': '🐰🔥',
+  'Cosmic Squirrel': '🐿️🌌',
+  // Add more creature emojis as needed
 };
 
 const INITIAL_SHOP_ITEMS = {
@@ -92,6 +109,45 @@ export default function App() {
   const [purchasedHabitats, setPurchasedHabitats] = useState({});
   const [purchasedCreatures, setPurchasedCreatures] = useState({});
   const [habitatOrder, setHabitatOrder] = useState([]);
+
+  const { user, isLoading } = useAuth();
+
+  // Function to save game state
+  const saveGameState = useCallback((state) => {
+    if (user) {
+      // In a real app, this would be an API call to save the state to a backend
+      localStorage.setItem(`gameState_${user.username}`, JSON.stringify(state));
+      console.log('Game state saved');
+    }
+  }, [user]);
+
+  // Load game state on login
+  useEffect(() => {
+    if (user) {
+      const savedState = localStorage.getItem(`gameState_${user.username}`);
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        setResources(parsedState.resources);
+        setProductionRates(parsedState.productionRates);
+        setShopItems(parsedState.shopItems);
+        setPurchasedHabitats(parsedState.purchasedHabitats);
+        setPurchasedCreatures(parsedState.purchasedCreatures);
+        setHabitatOrder(parsedState.habitatOrder);
+      }
+    }
+  }, [user]);
+
+  // Auto-save game state
+  const gameState = {
+    resources,
+    productionRates,
+    shopItems,
+    purchasedHabitats,
+    purchasedCreatures,
+    habitatOrder,
+  };
+
+  useAutoSave(gameState, saveGameState);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -283,6 +339,10 @@ export default function App() {
     alert(`Congratulations! You earned ${reward} ${rewardType} from ${gameName}!`);
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-[#FFE4B5] to-[#FFB6C1] font-fredoka flex flex-col">
       <header className="p-4 bg-[#8B4513] text-[#FFE4B5] shadow-md">
@@ -295,12 +355,30 @@ export default function App() {
         <ResourceBar resources={resources} onResourceClick={handleResourceClick} />
 
         <div className="flex-grow overflow-auto p-4">
-        <MainScreen
-          purchasedHabitats={purchasedHabitats}
-          purchasedCreatures={purchasedCreatures}
-          shopItems={shopItems}
-          onHabitatReorder={handleHabitatReorder}
-        />
+          <MainScreen
+            purchasedHabitats={purchasedHabitats}
+            purchasedCreatures={purchasedCreatures}
+            shopItems={shopItems}
+            onHabitatReorder={handleHabitatReorder}
+          />
+        </div>
+
+        {/* Creature Count Section */}
+        <div className="bg-[#3A5F5F] p-4 mx-4 mb-4 rounded-xl">
+          <h3 className="text-xl font-bold mb-2 text-[#FFE4B5]">Your Fuzzy Friends</h3>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+            {Object.entries(purchasedCreatures).map(([creatureName, count]) => (
+              count > 0 && (
+                <div key={creatureName} className="bg-[#4A7F7F] p-2 rounded-lg text-[#FFE4B5] flex flex-col items-center justify-center">
+                  <span className="text-2xl" title={creatureName}>{CREATURE_EMOJIS[creatureName] || '🐾'}</span>
+                  <span className="font-bold">{count}</span>
+                </div>
+              )
+            ))}
+          </div>
+          {Object.values(purchasedCreatures).every(count => count === 0) && (
+            <p className="text-[#FFE4B5] text-center">No creatures yet. Visit the Creatures menu to adopt some furry friends!</p>
+          )}
         </div>
 
         {showAlert && (
@@ -348,7 +426,16 @@ export default function App() {
             onGameComplete={handleGameComplete}
           />
         )}
-        {activeComponent === 'settings' && <Settings onClose={handleCloseComponent} />}
+        {activeComponent === 'settings' && (
+          <Settings 
+            onClose={handleCloseComponent} 
+            onSaveSettings={(newSettings) => {
+              // Handle saving settings
+              console.log('Saving settings:', newSettings);
+              // You might want to update some state or trigger some actions based on the new settings
+            }}
+          />
+        )}
       </main>
     </div>
   );

@@ -22,7 +22,7 @@ const HabitatCard = React.memo(({ habitat, index, onDragStart, onDragOver, onDro
   );
 });
 
-const MainScreen = ({ purchasedHabitats, purchasedCreatures, onHabitatReorder }) => {
+const MainScreen = ({ purchasedHabitats, purchasedCreatures, shopItems, onHabitatReorder }) => {
   const [habitats, setHabitats] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
@@ -80,7 +80,7 @@ const MainScreen = ({ purchasedHabitats, purchasedCreatures, onHabitatReorder })
   };
 
   return (
-    <div className="bg-[#2F4F4F] rounded-2xl p-4 shadow-xl overflow-hidden relative h-full">
+    <div className="bg-[#2F4F4F] rounded-2xl p-4 shadow-xl overflow-hidden relative">
       <h2 className="text-2xl font-bold mb-4 text-[#FFE4B5] text-center">🐰 Your Fuzzy Burrow 🐿️</h2>
       
       {/* Decorative elements */}
