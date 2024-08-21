@@ -6,16 +6,22 @@ const HABITAT_TYPES = {
     { name: 'Cozy Burrow', baseCost: 100, costMultiplier: 1.1, capacity: 2, resourceBonus: { type: 'carrots', amount: 0.2 }, emoji: '🏠' },
     { name: 'Carrot Patch', baseCost: 200, costMultiplier: 1.15, capacity: 4, resourceBonus: { type: 'carrots', amount: 0.5 }, emoji: '🥕' },
     { name: 'Nut Grove', baseCost: 300, costMultiplier: 1.2, capacity: 6, resourceBonus: { type: 'nuts', amount: 0.3 }, emoji: '🌰' },
+    { name: 'Berry Bush', baseCost: 250, costMultiplier: 1.18, capacity: 5, resourceBonus: { type: 'berries', amount: 0.4 }, emoji: '🫐' },
+    { name: 'Potato Field', baseCost: 350, costMultiplier: 1.22, capacity: 7, resourceBonus: { type: 'potatoes', amount: 0.35 }, emoji: '🥔' },
   ],
   Advanced: [
-    { name: 'Berry Field', baseCost: 400, costMultiplier: 1.25, capacity: 8, resourceBonus: { type: 'berries', amount: 0.4 }, emoji: '🫐' },
     { name: 'Mushroom Cave', baseCost: 500, costMultiplier: 1.3, capacity: 10, resourceBonus: { type: 'specialResources', amount: 0.2 }, emoji: '🍄' },
     { name: 'Treehouse', baseCost: 600, costMultiplier: 1.35, capacity: 12, resourceBonus: { type: 'all', amount: 0.1 }, emoji: '🌳' },
+    { name: 'Corn Maze', baseCost: 700, costMultiplier: 1.38, capacity: 14, resourceBonus: { type: 'corn', amount: 0.6 }, emoji: '🌽' },
+    { name: 'Tomato Greenhouse', baseCost: 750, costMultiplier: 1.4, capacity: 15, resourceBonus: { type: 'tomatoes', amount: 0.55 }, emoji: '🍅' },
+    { name: 'Clover Field', baseCost: 800, costMultiplier: 1.42, capacity: 16, resourceBonus: { type: 'luck', amount: 0.15 }, emoji: '🍀' },
   ],
   Luxury: [
-    { name: 'Luxury Warren', baseCost: 1000, costMultiplier: 1.4, capacity: 16, resourceBonus: { type: 'all', amount: 0.2 }, emoji: '🏰' },
-    { name: 'Crystal Cave', baseCost: 1500, costMultiplier: 1.45, capacity: 20, resourceBonus: { type: 'rareResources', amount: 0.3 }, emoji: '💎' },
-    { name: 'Sky Island', baseCost: 2000, costMultiplier: 1.5, capacity: 24, resourceBonus: { type: 'all', amount: 0.4 }, emoji: '☁️' },
+    { name: 'Luxury Warren', baseCost: 1000, costMultiplier: 1.5, capacity: 20, resourceBonus: { type: 'all', amount: 0.2 }, emoji: '🏰' },
+    { name: 'Crystal Cave', baseCost: 1500, costMultiplier: 1.6, capacity: 25, resourceBonus: { type: 'rareResources', amount: 0.3 }, emoji: '💎' },
+    { name: 'Sky Island', baseCost: 2000, costMultiplier: 1.7, capacity: 30, resourceBonus: { type: 'all', amount: 0.25 }, emoji: '☁️' },
+    { name: 'Time Warp Burrow', baseCost: 2500, costMultiplier: 1.8, capacity: 35, resourceBonus: { type: 'time', amount: 0.4 }, emoji: '⏳' },
+    { name: 'Enchanted Forest', baseCost: 3000, costMultiplier: 1.9, capacity: 40, resourceBonus: { type: 'magic', amount: 0.5 }, emoji: '🌟' },
   ],
 };
 
@@ -23,9 +29,8 @@ const Habitats = ({ onClose, onPurchase, resources, purchasedHabitats }) => {
   const [activeCategory, setActiveCategory] = useState('Basic');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const calculateCost = (habitatName) => {
-    const habitat = Object.values(HABITAT_TYPES).flat().find(h => h.name === habitatName);
-    const count = purchasedHabitats[habitatName] || 0;
+  const calculateCost = (habitat) => {
+    const count = purchasedHabitats[habitat.name] || 0;
     return Math.round(habitat.baseCost * Math.pow(habitat.costMultiplier, count));
   };
 
@@ -74,7 +79,7 @@ const Habitats = ({ onClose, onPurchase, resources, purchasedHabitats }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredHabitats.map((habitat) => {
-            const cost = calculateCost(habitat.name);
+            const cost = calculateCost(habitat);
             const count = purchasedHabitats[habitat.name] || 0;
             return (
               <div key={habitat.name} className="bg-[#FFF5E6] p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">

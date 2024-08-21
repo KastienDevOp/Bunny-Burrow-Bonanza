@@ -1,22 +1,82 @@
-// MainScreen.jsx
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import RoamingCreature from './RoamingCreature';
 
-const HabitatCard = ({ name, count, emoji }) => (
-  <div className="bg-[#8B4513] p-3 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:rotate-1 cursor-pointer">
-    <div className="text-3xl mb-1">{emoji}</div>
-    <h3 className="text-lg font-bold text-[#FFE4B5] mb-1">{name}</h3>
-    <p className="text-sm text-[#FFF8DC]">Count: {count}</p>
-  </div>
-);
+const HabitatCard = React.memo(({ habitat, index, onDragStart, onDragOver, onDrop }) => {
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('text/plain', index);
+    onDragStart(index);
+  };
 
-const MainScreen = ({ purchasedHabitats, purchasedCreatures }) => {
-  const habitatEmojis = {
-    'Cozy Burrow': '🏠',
-    'Carrot Patch': '🥕',
-    'Nut Grove': '🌰',
-    'Berry Field': '🫐',
-    'Luxury Warren': '🏰',
+  return (
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onDragOver={(e) => onDragOver(e, index)}
+      onDrop={(e) => onDrop(e, index)}
+      className="bg-[#8B4513] p-3 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:rotate-1 cursor-move"
+    >
+      <div className="text-3xl mb-1">{habitat.emoji}</div>
+      <h3 className="text-lg font-bold text-[#FFE4B5] mb-1">{habitat.name}</h3>
+      <p className="text-sm text-[#FFF8DC]">Count: {habitat.count}</p>
+    </div>
+  );
+});
+
+const MainScreen = ({ purchasedHabitats, purchasedCreatures, onHabitatReorder }) => {
+  const [habitats, setHabitats] = useState([]);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  useEffect(() => {
+    const habitatArray = Object.entries(purchasedHabitats)
+      .filter(([_, count]) => count > 0)
+      .map(([name, count]) => ({
+        name,
+        count,
+        emoji: getHabitatEmoji(name),
+      }));
+    setHabitats(habitatArray);
+  }, [purchasedHabitats]);
+
+  const getHabitatEmoji = useCallback((habitatName) => {
+    const emojiMap = {
+      'Cozy Burrow': '🏠',
+      'Carrot Patch': '🥕',
+      'Nut Grove': '🌰',
+      'Berry Bush': '🫐',
+      'Potato Field': '🥔',
+      'Mushroom Cave': '🍄',
+      'Treehouse': '🌳',
+      'Corn Maze': '🌽',
+      'Tomato Greenhouse': '🍅',
+      'Clover Field': '🍀',
+      'Luxury Warren': '🏰',
+      'Crystal Cave': '💎',
+      'Sky Island': '☁️',
+      'Time Warp Burrow': '⏳',
+      'Enchanted Forest': '🌟',
+    };
+    return emojiMap[habitatName] || '🏡';
+  }, []);
+
+  const handleDragStart = (index) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null) return;
+
+    const newHabitats = [...habitats];
+    const [reorderedItem] = newHabitats.splice(draggedIndex, 1);
+    newHabitats.splice(dropIndex, 0, reorderedItem);
+
+    setHabitats(newHabitats);
+    onHabitatReorder(newHabitats.map(habitat => habitat.name));
+    setDraggedIndex(null);
   };
 
   return (
@@ -32,24 +92,23 @@ const MainScreen = ({ purchasedHabitats, purchasedCreatures }) => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-auto max-h-[calc(100%-4rem)]">
-        {Object.entries(purchasedHabitats).map(([habitatName, count]) => (
-          count > 0 && (
-            <HabitatCard
-              key={habitatName}
-              name={habitatName}
-              count={count}
-              emoji={habitatEmojis[habitatName]}
-            />
-          )
+        {habitats.map((habitat, index) => (
+          <HabitatCard
+            key={`habitat-${habitat.name}`}
+            habitat={habitat}
+            index={index}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          />
         ))}
+        {habitats.length === 0 && (
+          <div className="col-span-full bg-[#3A5F5F] p-4 rounded-xl text-center">
+            <p className="text-[#FFE4B5] text-lg">Your burrow is empty! 🐾</p>
+            <p className="text-[#FFF8DC] text-sm">Visit the Habitats menu to start building your cozy home!</p>
+          </div>
+        )}
       </div>
-
-      {Object.values(purchasedHabitats).every(count => count === 0) && (
-        <div className="bg-[#3A5F5F] p-4 rounded-xl text-center">
-          <p className="text-[#FFE4B5] text-lg">Your burrow is empty! 🐾</p>
-          <p className="text-[#FFF8DC] text-sm">Visit the Habitats menu to start building your cozy home!</p>
-        </div>
-      )}
 
       {/* Roaming Creatures */}
       <div className="absolute inset-0 pointer-events-none">

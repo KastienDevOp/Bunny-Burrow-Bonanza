@@ -1,19 +1,25 @@
-// CarrotHarvest.jsx
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { motion } from 'framer-motion';
 
 const CarrotHarvest = ({ onComplete }) => {
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(30);
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      onComplete(score);
-    }
-  }, [timeLeft, score, onComplete]);
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          onComplete(score);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 950);
+
+    return () => clearInterval(timer);
+  }, [score, onComplete]);
 
   const handleClick = () => {
     setScore(score + 1);
@@ -25,13 +31,18 @@ const CarrotHarvest = ({ onComplete }) => {
       <p className="mb-4 text-[#A0522D]">Click as fast as you can to harvest carrots!</p>
       <p className="mb-2 text-lg font-semibold text-[#8B4513]">Time left: {timeLeft}s</p>
       <p className="mb-4 text-xl font-bold text-[#FF6347]">Score: {score}</p>
-      <Button 
-        onClick={handleClick} 
-        disabled={timeLeft === 0}
-        className="bg-[#FF6347] hover:bg-[#FF4500] text-white font-bold py-2 px-4 rounded-full text-lg"
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
       >
-        Harvest Carrot 🥕
-      </Button>
+        <Button 
+          onClick={handleClick} 
+          disabled={timeLeft === 0}
+          className="bg-[#FF6347] hover:bg-[#FF4500] text-white font-bold py-2 px-4 rounded-full text-lg"
+        >
+          Harvest Carrot 🥕
+        </Button>
+      </motion.div>
     </div>
   );
 };

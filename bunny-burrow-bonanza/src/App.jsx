@@ -15,62 +15,72 @@ const INITIAL_RESOURCES = {
   carrots: 1000,
   nuts: 0,
   berries: 0,
+  potatoes: 0,
+  tomatoes: 0,
+  corn: 0,
   specialResources: 0,
   rareResources: 0,
+  happiness: 0,
+  luck: 0,
+  time: 0,
+  magic: 0,
 };
 
 const INITIAL_PRODUCTION_RATES = {
   carrots: 1,
   nuts: 0.5,
   berries: 0.3,
+  potatoes: 0.4,
+  tomatoes: 0.25,
+  corn: 0.35,
   specialResources: 0.1,
   rareResources: 0.01,
+  happiness: 0.1,
+  luck: 0.02,
+  time: 0.03,
+  magic: 0.04,
 };
 
 const INITIAL_SHOP_ITEMS = {
-  'Carrot Seeds': { count: 0, baseCost: 10, costMultiplier: 1.1, productionIncrease: { resource: 'carrots', amount: 0.5 } },
-  'Nut Tree': { count: 0, baseCost: 50, costMultiplier: 1.15, productionIncrease: { resource: 'nuts', amount: 0.3 } },
-  'Berry Bush': { count: 0, baseCost: 30, costMultiplier: 1.12, productionIncrease: { resource: 'berries', amount: 0.2 } },
-  'Magic Fertilizer': { count: 0, baseCost: 100, costMultiplier: 1.2, productionIncrease: { resource: 'specialResources', amount: 0.1 } },
-  'Golden Carrot': { count: 0, baseCost: 500, costMultiplier: 1.25, productionIncrease: { resource: 'rareResources', amount: 0.05 } },
-  'Carrot Harvester': { count: 0, baseCost: 200, costMultiplier: 1.18, productionIncrease: { resource: 'carrots', amount: 1 } },
-  'Nut Cracker': { count: 0, baseCost: 150, costMultiplier: 1.16, productionIncrease: { resource: 'nuts', amount: 0.6 } },
-  'Berry Picker': { count: 0, baseCost: 180, costMultiplier: 1.17, productionIncrease: { resource: 'berries', amount: 0.5 } },
-  'Resource Multiplier': { count: 0, baseCost: 1000, costMultiplier: 1.3, productionIncrease: { resource: 'all', amount: 0.1 } },
-};
-
-const INITIAL_HABITATS = {
-  'Cozy Burrow': 0,
-  'Carrot Patch': 0,
-  'Nut Grove': 0,
-  'Berry Field': 0,
-  'Luxury Warren': 0,
-};
-
-const INITIAL_CREATURES = {
-  'Common Bunny': 0,
-  'Nutty Squirrel': 0,
-  'Berry Fox': 0,
-  'Magic Hare': 0,
-  'Golden Rabbit': 0,
-  'Resource Raccoon': 0,
+  'Carrot Seeds': { count: 0, productionIncrease: { resource: 'carrots', amount: 0.5 } },
+  'Nut Seeds': { count: 0, productionIncrease: { resource: 'nuts', amount: 0.3 } },
+  'Berry Seeds': { count: 0, productionIncrease: { resource: 'berries', amount: 0.2 } },
+  'Potato Seeds': { count: 0, productionIncrease: { resource: 'potatoes', amount: 0.4 } },
+  'Tomato Seeds': { count: 0, productionIncrease: { resource: 'tomatoes', amount: 0.25 } },
+  'Corn Seeds': { count: 0, productionIncrease: { resource: 'corn', amount: 0.35 } },
+  'Magic Fertilizer': { count: 0, productionIncrease: { resource: 'specialResources', amount: 0.1 } },
+  'Golden Carrot': { count: 0, productionIncrease: { resource: 'rareResources', amount: 0.05 } },
+  'Resource Multiplier': { count: 0, productionIncrease: { resource: 'all', amount: 0.1 } },
+  'Lucky Charm': { count: 0, productionIncrease: { resource: 'luck', amount: 0.02 } },
+  'Time Warp': { count: 0, productionIncrease: { resource: 'time', amount: 0.03 } },
+  'Mystic Crystal': { count: 0, productionIncrease: { resource: 'magic', amount: 0.04 } },
 };
 
 const HABITAT_TYPES = {
-  'Cozy Burrow': { baseCost: 100, costMultiplier: 1.1, capacity: 2, resourceBonus: { type: 'carrots', amount: 0.2 } },
-  'Carrot Patch': { baseCost: 200, costMultiplier: 1.15, capacity: 4, resourceBonus: { type: 'carrots', amount: 0.5 } },
-  'Nut Grove': { baseCost: 300, costMultiplier: 1.2, capacity: 6, resourceBonus: { type: 'nuts', amount: 0.3 } },
-  'Berry Field': { baseCost: 400, costMultiplier: 1.25, capacity: 8, resourceBonus: { type: 'berries', amount: 0.4 } },
-  'Luxury Warren': { baseCost: 1000, costMultiplier: 1.3, capacity: 12, resourceBonus: { type: 'all', amount: 0.1 } },
+  'Cozy Burrow': { resourceBonus: { type: 'carrots', amount: 0.2 } },
+  'Carrot Patch': { resourceBonus: { type: 'carrots', amount: 0.5 } },
+  'Nut Grove': { resourceBonus: { type: 'nuts', amount: 0.3 } },
+  'Berry Bush': { resourceBonus: { type: 'berries', amount: 0.4 } },
+  'Potato Field': { resourceBonus: { type: 'potatoes', amount: 0.35 } },
+  'Mushroom Cave': { resourceBonus: { type: 'specialResources', amount: 0.2 } },
+  'Treehouse': { resourceBonus: { type: 'all', amount: 0.1 } },
+  'Corn Maze': { resourceBonus: { type: 'corn', amount: 0.6 } },
+  'Tomato Greenhouse': { resourceBonus: { type: 'tomatoes', amount: 0.55 } },
+  'Clover Field': { resourceBonus: { type: 'luck', amount: 0.15 } },
+  'Luxury Warren': { resourceBonus: { type: 'all', amount: 0.2 } },
+  'Crystal Cave': { resourceBonus: { type: 'rareResources', amount: 0.3 } },
+  'Sky Island': { resourceBonus: { type: 'all', amount: 0.25 } },
+  'Time Warp Burrow': { resourceBonus: { type: 'time', amount: 0.4 } },
+  'Enchanted Forest': { resourceBonus: { type: 'magic', amount: 0.5 } },
 };
 
 const CREATURE_TYPES = {
-  'Common Bunny': { baseCost: 50, costMultiplier: 1.1, resourceBonus: { type: 'carrots', amount: 0.2 } },
-  'Nutty Squirrel': { baseCost: 100, costMultiplier: 1.15, resourceBonus: { type: 'nuts', amount: 0.3 } },
-  'Berry Fox': { baseCost: 150, costMultiplier: 1.2, resourceBonus: { type: 'berries', amount: 0.4 } },
-  'Magic Hare': { baseCost: 500, costMultiplier: 1.25, resourceBonus: { type: 'specialResources', amount: 0.1 } },
-  'Golden Rabbit': { baseCost: 1000, costMultiplier: 1.3, resourceBonus: { type: 'rareResources', amount: 0.05 } },
-  'Resource Raccoon': { baseCost: 2000, costMultiplier: 1.35, resourceBonus: { type: 'all', amount: 0.05 } },
+  'Common Bunny': { resourceBonus: { type: 'carrots', amount: 0.2 } },
+  'Nutty Squirrel': { resourceBonus: { type: 'nuts', amount: 0.3 } },
+  'Berry Fox': { resourceBonus: { type: 'berries', amount: 0.4 } },
+  'Magic Hare': { resourceBonus: { type: 'specialResources', amount: 0.1 } },
+  'Golden Rabbit': { resourceBonus: { type: 'rareResources', amount: 0.05 } },
+  'Resource Raccoon': { resourceBonus: { type: 'all', amount: 0.05 } },
 };
 
 export default function App() {
@@ -79,8 +89,9 @@ export default function App() {
   const [showAlert, setShowAlert] = useState(true);
   const [activeComponent, setActiveComponent] = useState(null);
   const [shopItems, setShopItems] = useState(INITIAL_SHOP_ITEMS);
-  const [purchasedHabitats, setPurchasedHabitats] = useState(INITIAL_HABITATS);
-  const [purchasedCreatures, setPurchasedCreatures] = useState(INITIAL_CREATURES);
+  const [purchasedHabitats, setPurchasedHabitats] = useState({});
+  const [purchasedCreatures, setPurchasedCreatures] = useState({});
+  const [habitatOrder, setHabitatOrder] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -98,44 +109,50 @@ export default function App() {
 
   useEffect(() => {
     updateProductionRates();
-  }, [purchasedHabitats, purchasedCreatures, shopItems]);
+  }, [shopItems, purchasedHabitats, purchasedCreatures]);
 
   const updateProductionRates = () => {
     setProductionRates(prevRates => {
       const newRates = { ...INITIAL_PRODUCTION_RATES };
-      
+
       // Apply shop item bonuses
       Object.entries(shopItems).forEach(([itemName, item]) => {
-        if (item.productionIncrease.resource === 'all') {
-          Object.keys(newRates).forEach(resource => {
-            newRates[resource] *= Math.pow(1 + item.productionIncrease.amount, item.count);
-          });
-        } else {
-          newRates[item.productionIncrease.resource] += item.productionIncrease.amount * item.count;
+        if (item.productionIncrease) {
+          if (item.productionIncrease.resource === 'all') {
+            Object.keys(newRates).forEach(resource => {
+              newRates[resource] *= Math.pow(1 + item.productionIncrease.amount, item.count);
+            });
+          } else {
+            newRates[item.productionIncrease.resource] += item.productionIncrease.amount * item.count;
+          }
         }
       });
 
       // Apply habitat bonuses
       Object.entries(purchasedHabitats).forEach(([habitatName, count]) => {
         const habitat = HABITAT_TYPES[habitatName];
-        if (habitat.resourceBonus.type === 'all') {
-          Object.keys(newRates).forEach(resource => {
-            newRates[resource] *= Math.pow(1 + habitat.resourceBonus.amount, count);
-          });
-        } else {
-          newRates[habitat.resourceBonus.type] += habitat.resourceBonus.amount * count;
+        if (habitat && habitat.resourceBonus) {
+          if (habitat.resourceBonus.type === 'all') {
+            Object.keys(newRates).forEach(resource => {
+              newRates[resource] *= Math.pow(1 + habitat.resourceBonus.amount, count);
+            });
+          } else {
+            newRates[habitat.resourceBonus.type] += habitat.resourceBonus.amount * count;
+          }
         }
       });
 
       // Apply creature bonuses
       Object.entries(purchasedCreatures).forEach(([creatureName, count]) => {
         const creature = CREATURE_TYPES[creatureName];
-        if (creature.resourceBonus.type === 'all') {
-          Object.keys(newRates).forEach(resource => {
-            newRates[resource] *= Math.pow(1 + creature.resourceBonus.amount, count);
-          });
-        } else {
-          newRates[creature.resourceBonus.type] += creature.resourceBonus.amount * count;
+        if (creature && creature.resourceBonus) {
+          if (creature.resourceBonus.type === 'all') {
+            Object.keys(newRates).forEach(resource => {
+              newRates[resource] *= Math.pow(1 + creature.resourceBonus.amount, count);
+            });
+          } else {
+            newRates[creature.resourceBonus.type] += creature.resourceBonus.amount * count;
+          }
         }
       });
 
@@ -158,19 +175,22 @@ export default function App() {
     setActiveComponent(null);
   };
 
-  const handlePurchase = (itemName, cost) => {
+  const handlePurchase = (item, cost) => {
     if (resources.carrots >= cost) {
       setResources(prevResources => ({
         ...prevResources,
         carrots: prevResources.carrots - cost
       }));
 
-      setShopItems(prevItems => {
-        const updatedItems = { ...prevItems };
-        const item = updatedItems[itemName];
-        item.count += 1;
-        return updatedItems;
-      });
+      setShopItems(prevItems => ({
+        ...prevItems,
+        [item.name]: {
+          ...prevItems[item.name],
+          count: (prevItems[item.name]?.count || 0) + 1
+        }
+      }));
+
+      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
@@ -182,17 +202,32 @@ export default function App() {
         ...prevResources,
         carrots: prevResources.carrots - cost
       }));
-
-      setPurchasedHabitats(prevHabitats => ({
-        ...prevHabitats,
-        [habitat.name]: (prevHabitats[habitat.name] || 0) + 1
-      }));
+  
+      setPurchasedHabitats(prevHabitats => {
+        const updatedHabitats = {
+          ...prevHabitats,
+          [habitat.name]: (prevHabitats[habitat.name] || 0) + 1
+        };
+  
+        // Update habitat order
+        if (!habitatOrder.includes(habitat.name)) {
+          setHabitatOrder(prevOrder => [...prevOrder, habitat.name]);
+        }
+  
+        return updatedHabitats;
+      });
+  
+      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
   };
+  
+  const handleHabitatReorder = (newOrder) => {
+    console.log('Reordering habitats:', newOrder);
+    setHabitatOrder(newOrder);
+  };
 
-  // Update the handleCreaturePurchase function
   const handleCreaturePurchase = (creature, cost) => {
     if (resources.carrots >= cost) {
       setResources(prevResources => ({
@@ -205,8 +240,7 @@ export default function App() {
         [creature.name]: (prevCreatures[creature.name] || 0) + 1
       }));
 
-      // Update production rates when a new creature is purchased
-      updateProductionRates();
+      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
@@ -259,9 +293,14 @@ export default function App() {
 
       <main className="flex-grow flex flex-col overflow-hidden">
         <ResourceBar resources={resources} onResourceClick={handleResourceClick} />
-        
+
         <div className="flex-grow overflow-auto p-4">
-          <MainScreen purchasedHabitats={purchasedHabitats} purchasedCreatures={purchasedCreatures} />
+        <MainScreen
+          purchasedHabitats={purchasedHabitats}
+          purchasedCreatures={purchasedCreatures}
+          shopItems={shopItems}
+          onHabitatReorder={handleHabitatReorder}
+        />
         </div>
 
         {showAlert && (
@@ -280,31 +319,31 @@ export default function App() {
         <Menu onMenuClick={handleMenuClick} />
 
         {activeComponent === 'shop' && (
-          <Shop 
-            onClose={handleCloseComponent} 
-            onPurchase={handlePurchase} 
+          <Shop
+            onClose={handleCloseComponent}
+            onPurchase={handlePurchase}
             resources={resources}
             shopItems={shopItems}
           />
         )}
         {activeComponent === 'habitats' && (
-          <Habitats 
-            onClose={handleCloseComponent} 
-            onPurchase={handleHabitatPurchase} 
-            resources={resources} 
+          <Habitats
+            onClose={handleCloseComponent}
+            onPurchase={handleHabitatPurchase}
+            resources={resources}
             purchasedHabitats={purchasedHabitats}
           />
         )}
         {activeComponent === 'creatures' && (
-          <Creatures 
-            onClose={handleCloseComponent} 
-            onPurchase={handleCreaturePurchase} 
-            resources={resources} 
+          <Creatures
+            onClose={handleCloseComponent}
+            onPurchase={handleCreaturePurchase}
+            resources={resources}
             purchasedCreatures={purchasedCreatures}
           />
         )}
         {activeComponent === 'miniGames' && (
-          <MiniGames 
+          <MiniGames
             onClose={handleCloseComponent}
             onGameComplete={handleGameComplete}
           />

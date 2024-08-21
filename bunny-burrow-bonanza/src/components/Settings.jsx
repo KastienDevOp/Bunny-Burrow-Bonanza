@@ -92,7 +92,7 @@ const Settings = ({ onClose, onSaveSettings }) => {
             </div>
           ))}
         </div>
-        <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={handleSaveSettings}>Save Settings</Button>
+        <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={onClose}>Save Settings</Button>
       </div>
     </div>
   );

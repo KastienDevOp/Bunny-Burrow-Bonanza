@@ -5,6 +5,9 @@ import NutGathering from './NutGathering';
 import BerryPicking from './BerryPicking';
 import BunnyHop from './BunnyHop';
 import WarrenMaze from './WarrenMaze';
+import CreatureCare from './CreatureCare';
+import ResourceRush from './ResourceRush';
+import { motion } from 'framer-motion';
 
 const MINI_GAMES = {
   Beginner: [
@@ -17,9 +20,8 @@ const MINI_GAMES = {
     { name: 'Warren Maze', component: WarrenMaze, reward: 'Rare resources', emoji: '🏰' },
   ],
   Advanced: [
-    { name: 'Creature Care', component: null, reward: 'Creature happiness boost', emoji: '🐾' },
-    { name: 'Resource Rush', component: null, reward: 'Random resource boost', emoji: '🌪️' },
-    { name: 'Burrow Builder', component: null, reward: 'Habitat upgrade materials', emoji: '🏗️' },
+    { name: 'Creature Care', component: CreatureCare, reward: 'Creature happiness boost', emoji: '🐾' },
+    { name: 'Resource Rush', component: ResourceRush, reward: 'Random resource boost', emoji: '🌪️' },
   ],
 };
 
@@ -39,7 +41,12 @@ const MiniGames = ({ onClose, onGameComplete }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#FFF8DC] p-6 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto fuzzy-border">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-[#FFF8DC] p-6 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto fuzzy-border"
+      >
         <h2 className="text-3xl font-bold mb-4 text-[#8B4513] text-center">🎮 Fuzzy Fun Games</h2>
         
         {activeGame ? (
@@ -54,15 +61,17 @@ const MiniGames = ({ onClose, onGameComplete }) => {
           </div>
         ) : (
           <>
-            <div className="mb-4">
+            <div className="mb-4 flex flex-wrap justify-center">
               {Object.keys(MINI_GAMES).map(category => (
-                <Button
+                <motion.button
                   key={category}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setActiveCategory(category)}
-                  className={`mr-2 ${activeCategory === category ? 'bg-[#DEB887] text-white' : 'bg-[#FFE4B5] text-[#8B4513]'} hover:bg-[#FFDAB9]`}
+                  className={`m-1 px-4 py-2 rounded-full ${activeCategory === category ? 'bg-[#DEB887] text-white' : 'bg-[#FFE4B5] text-[#8B4513]'} hover:bg-[#FFDAB9] transition-colors duration-200`}
                 >
                   {category}
-                </Button>
+                </motion.button>
               ))}
             </div>
 
@@ -78,30 +87,33 @@ const MiniGames = ({ onClose, onGameComplete }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredGames.map((game, index) => (
-                <div key={index} className="bg-[#FFF5E6] p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                <motion.div 
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  className="bg-[#FFF5E6] p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                >
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="font-bold text-[#8B4513] flex items-center">
+                      <span className="font-bold text-[#8B4513] flex items-center text-lg">
                         {game.emoji} {game.name}
                       </span>
-                      <p className="text-sm text-[#A0522D]">Reward: {game.reward}</p>
+                      <p className="text-sm text-[#A0522D] mt-1">Reward: {game.reward}</p>
                     </div>
                     <Button 
                       variant="outline" 
                       onClick={() => setActiveGame(game.name)}
-                      disabled={!game.component}
-                      className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] transition-colors duration-200"
                     >
-                      {game.component ? 'Play' : 'Coming Soon'}
+                      Play
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </>
         )}
         <Button className="mt-6 w-full bg-[#DEB887] text-white hover:bg-[#D2691E]" onClick={onClose}>Close Games</Button>
-      </div>
+      </motion.div>
     </div>
   );
 };
