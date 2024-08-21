@@ -1,6 +1,6 @@
 # Bunny Burrow Bonanza
 
-![Bunny Burrow Bonanza Logo](path/to/logo.png)
+![Bunny Burrow Bonanza Logo](bunnos.png)
 
 ## Overview
 
