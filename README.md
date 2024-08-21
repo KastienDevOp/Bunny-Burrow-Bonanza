@@ -1,6 +1,3 @@
-To add the images of your game to the README, you can include the images using the Markdown syntax for images. Here’s how you can modify your README to include `StartGame.png` and `Gameplay.png`:
-
-```markdown
 # Bunny Burrow Bonanza
 
 ![Bunny Burrow Bonanza Logo](bunnos.png)
