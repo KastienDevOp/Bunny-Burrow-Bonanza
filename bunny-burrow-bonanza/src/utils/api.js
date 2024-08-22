@@ -1,10 +1,10 @@
+// api.js
 import { openDB } from 'idb';
 
 const DB_NAME = 'BunnyBurrowBonanza';
 const USER_STORE = 'users';
 const GAME_STATE_STORE = 'gameStates';
 
-// Initialize the database
 const dbPromise = openDB(DB_NAME, 1, {
   upgrade(db) {
     db.createObjectStore(USER_STORE, { keyPath: 'username' });
@@ -12,7 +12,6 @@ const dbPromise = openDB(DB_NAME, 1, {
   },
 });
 
-// Helper function to hash passwords
 const hashPassword = async (password) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -21,6 +20,22 @@ const hashPassword = async (password) => {
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
 };
+
+const initializeGameState = (username) => ({
+  username,
+  resources: {
+    carrots: 100,
+    nuts: 0,
+    berries: 0,
+    // ... add other initial resources
+  },
+  purchasedCreatures: {},
+  purchasedHabitats: {},
+  shopItems: {},
+  habitatOrder: [],
+  settings: {},
+  lastSaved: new Date().toISOString()
+});
 
 export const api = {
   login: async (username, password) => {
@@ -54,13 +69,7 @@ export const api = {
     const db = await dbPromise;
     const fullGameState = {
       username,
-      resources: gameState.resources,
-      productionRates: gameState.productionRates,
-      shopItems: gameState.shopItems,
-      purchasedHabitats: gameState.purchasedHabitats,
-      purchasedCreatures: gameState.purchasedCreatures,
-      habitatOrder: gameState.habitatOrder,
-      settings: gameState.settings,
+      ...gameState,
       lastSaved: new Date().toISOString()
     };
     await db.put(GAME_STATE_STORE, fullGameState);
@@ -68,59 +77,118 @@ export const api = {
 
   loadGameState: async (username) => {
     const db = await dbPromise;
-    const gameState = await db.get(GAME_STATE_STORE, username);
-    if (gameState) {
-      return {
-        resources: gameState.resources,
-        productionRates: gameState.productionRates,
-        shopItems: gameState.shopItems,
-        purchasedHabitats: gameState.purchasedHabitats,
-        purchasedCreatures: gameState.purchasedCreatures,
-        habitatOrder: gameState.habitatOrder,
-        settings: gameState.settings,
-        lastSaved: gameState.lastSaved
-      };
+    let gameState = await db.get(GAME_STATE_STORE, username);
+    if (!gameState) {
+      gameState = initializeGameState(username);
+      await db.put(GAME_STATE_STORE, gameState);
     }
-    return null;
+    return gameState;
   },
 
-  exportData: async () => {
+  exportData: async (username) => {
     const db = await dbPromise;
-    const users = await db.getAll(USER_STORE);
-    const gameStates = await db.getAll(GAME_STATE_STORE);
+    let gameState = await db.get(GAME_STATE_STORE, username);
     
-    const data = {
-      users: users.map(({ username, password }) => ({ username, password })),
-      gameStates,
-    };
+    if (!gameState) {
+      gameState = initializeGameState(username);
+      await db.put(GAME_STATE_STORE, gameState);
+    }
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(gameState, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'bunny_burrow_bonanza_data.json';
+    a.download = `bunny_burrow_bonanza_${username}.json`;
     a.click();
     
     URL.revokeObjectURL(url);
   },
 
-  importData: async (jsonData) => {
+  importData: async (username, jsonData) => {
     const db = await dbPromise;
-    const data = JSON.parse(jsonData);
+    const gameState = JSON.parse(jsonData);
     
+    if (gameState.username !== username) {
+      throw new Error('This save file belongs to a different user');
+    }
+    
+    await db.put(GAME_STATE_STORE, gameState);
+  },
+
+  devAddResource: async (username, resourceType, amount) => {
+    const db = await dbPromise;
+    const tx = db.transaction(GAME_STATE_STORE, 'readwrite');
+    const store = tx.objectStore(GAME_STATE_STORE);
+    let gameState = await store.get(username);
+    
+    if (!gameState) {
+      gameState = initializeGameState(username);
+    }
+
+    gameState.resources[resourceType] = (gameState.resources[resourceType] || 0) + amount;
+    await store.put(gameState);
+    await tx.done;
+
+    return gameState;
+  },
+
+  devRemoveResource: async (username, resourceType, amount) => {
+    const db = await dbPromise;
+    const tx = db.transaction(GAME_STATE_STORE, 'readwrite');
+    const store = tx.objectStore(GAME_STATE_STORE);
+    let gameState = await store.get(username);
+    
+    if (!gameState) {
+      gameState = initializeGameState(username);
+    }
+
+    gameState.resources[resourceType] = Math.max(0, (gameState.resources[resourceType] || 0) - amount);
+    await store.put(gameState);
+    await tx.done;
+
+    return gameState;
+  },
+
+  devAddCreature: async (username, creatureType, amount) => {
+    const db = await dbPromise;
+    const tx = db.transaction(GAME_STATE_STORE, 'readwrite');
+    const store = tx.objectStore(GAME_STATE_STORE);
+    let gameState = await store.get(username);
+    
+    if (!gameState) {
+      gameState = initializeGameState(username);
+    }
+
+    gameState.purchasedCreatures[creatureType] = (gameState.purchasedCreatures[creatureType] || 0) + amount;
+    await store.put(gameState);
+    await tx.done;
+
+    return gameState;
+  },
+
+  devRemoveCreature: async (username, creatureType, amount) => {
+    const db = await dbPromise;
+    const tx = db.transaction(GAME_STATE_STORE, 'readwrite');
+    const store = tx.objectStore(GAME_STATE_STORE);
+    let gameState = await store.get(username);
+    
+    if (!gameState) {
+      gameState = initializeGameState(username);
+    }
+
+    gameState.purchasedCreatures[creatureType] = Math.max(0, (gameState.purchasedCreatures[creatureType] || 0) - amount);
+    await store.put(gameState);
+    await tx.done;
+
+    return gameState;
+  },
+
+  devPurgeAllData: async () => {
+    const db = await dbPromise;
     const tx = db.transaction([USER_STORE, GAME_STATE_STORE], 'readwrite');
-    const userStore = tx.objectStore(USER_STORE);
-    const gameStateStore = tx.objectStore(GAME_STATE_STORE);
-    
-    for (const user of data.users) {
-      await userStore.put(user);
-    }
-    
-    for (const gameState of data.gameStates) {
-      await gameStateStore.put(gameState);
-    }
-    
+    await tx.objectStore(USER_STORE).clear();
+    await tx.objectStore(GAME_STATE_STORE).clear();
     await tx.done;
   },
 };

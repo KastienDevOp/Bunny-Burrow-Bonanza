@@ -10,9 +10,11 @@ import Habitats from './components/Habitats';
 import Creatures from './components/Creatures';
 import MiniGames from './components/MiniGames';
 import Settings from './components/Settings';
+import CreatureMerge from './components/CreatureMerge';
 import useAuth from './hooks/useAuth';
 import useAutoSave from './hooks/useAutoSave';
 import api from './utils/api';
+import { CREATURE_EMOJIS, MERGE_COMBINATIONS } from './components/constants';
 
 const INITIAL_RESOURCES = {
   carrots: 1000,
@@ -84,20 +86,6 @@ const INITIAL_PRODUCTION_RATES = {
   magic: 0.04,
 };
 
-const CREATURE_EMOJIS = {
-  'Common Bunny': '🐰',
-  'Nutty Squirrel': '🐿️',
-  'Berry Fox': '🦊',
-  'Magic Hare': '🐇✨',
-  'Golden Rabbit': '🐰✨',
-  'Resource Raccoon': '🦝',
-  'Crystal Deer': '🦌💎',
-  'Rainbow Unicorn': '🦄',
-  'Phoenix Rabbit': '🐰🔥',
-  'Cosmic Squirrel': '🐿️🌌',
-  // Add more creature emojis as needed
-};
-
 const INITIAL_SHOP_ITEMS = {
   'Carrot Seeds': { count: 0, productionIncrease: { resource: 'carrots', amount: 0.5 } },
   'Nut Seeds': { count: 0, productionIncrease: { resource: 'nuts', amount: 0.3 } },
@@ -149,6 +137,8 @@ export default function App() {
   const [purchasedHabitats, setPurchasedHabitats] = useState({});
   const [purchasedCreatures, setPurchasedCreatures] = useState({});
   const [habitatOrder, setHabitatOrder] = useState([]);
+  const [purchasedEpicSkins, setPurchasedEpicSkins] = useState({});
+  const [showDevOptions, setShowDevOptions] = useState(false);
 
   const { user, isLoading } = useAuth();
 
@@ -174,13 +164,7 @@ export default function App() {
           if (user) {
             const loadedState = await api.loadGameState(user.username);
             if (loadedState) {
-              setResources(loadedState.resources);
-              setProductionRates(loadedState.productionRates);
-              setShopItems(loadedState.shopItems);
-              setPurchasedHabitats(loadedState.purchasedHabitats);
-              setPurchasedCreatures(loadedState.purchasedCreatures);
-              setHabitatOrder(loadedState.habitatOrder);
-              // Update any other state that was loaded
+              handleGameStateChange(loadedState);
             }
           }
         } catch (error) {
@@ -196,7 +180,30 @@ export default function App() {
     }
   };
 
-  // Function to save game state
+  const handleCreatureMerge = (creatureName, mergedResult) => {
+    if (purchasedCreatures[creatureName]) {
+      setPurchasedCreatures(prev => ({
+        ...prev,
+        [creatureName]: prev[creatureName] - 3
+      }));
+      setPurchasedEpicSkins(prev => ({
+        ...prev,
+        [mergedResult.name]: (prev[mergedResult.name] || 0) + 1
+      }));
+    } else if (purchasedEpicSkins[creatureName]) {
+      setPurchasedEpicSkins(prev => {
+        const updated = { ...prev };
+        updated[creatureName] -= 3;
+        if (updated[creatureName] <= 0) {
+          delete updated[creatureName];
+        }
+        updated[mergedResult.name] = (updated[mergedResult.name] || 0) + 1;
+        return updated;
+      });
+    }
+    alert(`Congratulations! You've unlocked the ${mergedResult.name} (${mergedResult.emoji})!`);
+  };
+
   const saveGameState = useCallback(async (state) => {
     if (user) {
       try {
@@ -208,20 +215,13 @@ export default function App() {
     }
   }, [user]);
 
-  // Load game state on login
   useEffect(() => {
     const loadGameState = async () => {
       if (user) {
         try {
           const loadedState = await api.loadGameState(user.username);
           if (loadedState) {
-            setResources(loadedState.resources);
-            setProductionRates(loadedState.productionRates);
-            setShopItems(loadedState.shopItems);
-            setPurchasedHabitats(loadedState.purchasedHabitats);
-            setPurchasedCreatures(loadedState.purchasedCreatures);
-            setHabitatOrder(loadedState.habitatOrder);
-            // You might want to add any other state that needs to be loaded here
+            handleGameStateChange(loadedState);
           }
         } catch (error) {
           console.error('Error loading game state:', error);
@@ -232,7 +232,6 @@ export default function App() {
     loadGameState();
   }, [user]);
 
-  // Auto-save game state
   const gameState = {
     resources,
     productionRates,
@@ -240,24 +239,10 @@ export default function App() {
     purchasedHabitats,
     purchasedCreatures,
     habitatOrder,
-    // Add any other state that needs to be saved here
+    purchasedEpicSkins,
   };
 
   useAutoSave(gameState, saveGameState);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setResources(prevResources => {
-        const newResources = { ...prevResources };
-        Object.keys(productionRates).forEach(resource => {
-          newResources[resource] += productionRates[resource];
-        });
-        return newResources;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [productionRates]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -281,7 +266,6 @@ export default function App() {
     setProductionRates(prevRates => {
       const newRates = { ...INITIAL_PRODUCTION_RATES };
 
-      // Apply shop item bonuses
       Object.entries(shopItems).forEach(([itemName, item]) => {
         if (item.productionIncrease) {
           if (item.productionIncrease.resource === 'all') {
@@ -294,7 +278,6 @@ export default function App() {
         }
       });
 
-      // Apply habitat bonuses
       Object.entries(purchasedHabitats).forEach(([habitatName, count]) => {
         const habitat = HABITAT_TYPES[habitatName];
         if (habitat && habitat.resourceBonus) {
@@ -308,7 +291,6 @@ export default function App() {
         }
       });
 
-      // Apply creature bonuses
       Object.entries(purchasedCreatures).forEach(([creatureName, count]) => {
         const creature = CREATURE_TYPES[creatureName];
         if (creature && creature.resourceBonus) {
@@ -355,8 +337,6 @@ export default function App() {
           count: (prevItems[item.name]?.count || 0) + 1
         }
       }));
-
-      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
@@ -368,29 +348,25 @@ export default function App() {
         ...prevResources,
         carrots: prevResources.carrots - cost
       }));
-  
+
       setPurchasedHabitats(prevHabitats => {
         const updatedHabitats = {
           ...prevHabitats,
           [habitat.name]: (prevHabitats[habitat.name] || 0) + 1
         };
-  
-        // Update habitat order
+
         if (!habitatOrder.includes(habitat.name)) {
           setHabitatOrder(prevOrder => [...prevOrder, habitat.name]);
         }
-  
+
         return updatedHabitats;
       });
-  
-      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
   };
-  
+
   const handleHabitatReorder = (newOrder) => {
-    console.log('Reordering habitats:', newOrder);
     setHabitatOrder(newOrder);
   };
 
@@ -405,11 +381,19 @@ export default function App() {
         ...prevCreatures,
         [creature.name]: (prevCreatures[creature.name] || 0) + 1
       }));
-
-      // Production rates will be updated via the useEffect hook
     } else {
       alert("Not enough carrots!");
     }
+  };
+
+  const handleGameStateChange = (newGameState) => {
+    setResources(newGameState.resources);
+    setProductionRates(newGameState.productionRates);
+    setShopItems(newGameState.shopItems);
+    setPurchasedHabitats(newGameState.purchasedHabitats);
+    setPurchasedCreatures(newGameState.purchasedCreatures);
+    setHabitatOrder(newGameState.habitatOrder);
+    setPurchasedEpicSkins(newGameState.purchasedEpicSkins || {});
   };
 
   const handleGameComplete = (gameName, score) => {
@@ -458,6 +442,20 @@ export default function App() {
     alert(`Congratulations! You earned ${reward} ${rewardType} from ${gameName}!`);
   };
 
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.ctrlKey && event.altKey && event.key === 'd') {
+        setShowDevOptions(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -477,12 +475,12 @@ export default function App() {
           <MainScreen
             purchasedHabitats={purchasedHabitats}
             purchasedCreatures={purchasedCreatures}
+            purchasedEpicSkins={purchasedEpicSkins}
             shopItems={shopItems}
             onHabitatReorder={handleHabitatReorder}
           />
         </div>
 
-        {/* Creature Count Section */}
         <div className="bg-[#3A5F5F] p-2 mx-4 mb-3 rounded-xl">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
             {Object.entries(purchasedCreatures).map(([creatureName, count]) => (
@@ -493,8 +491,16 @@ export default function App() {
                 </div>
               )
             ))}
+            {Object.entries(purchasedEpicSkins).map(([creatureName, count]) => (
+              count > 0 && (
+                <div key={`epic-${creatureName}`} className="bg-[#4A7F7F] p-1 rounded-lg text-[#FFE4B5] flex flex-col items-center justify-center">
+                  <span className="text-2xl" title={`Epic ${creatureName}`}>{MERGE_COMBINATIONS[creatureName].emoji}</span>
+                  <span className="font-bold">{count}</span>
+                </div>
+              )
+            ))}
           </div>
-          {Object.values(purchasedCreatures).every(count => count === 0) && (
+          {Object.values(purchasedCreatures).every(count => count === 0) && Object.values(purchasedEpicSkins).every(count => count === 0) && (
             <p className="text-[#FFE4B5] text-center">No creatures yet. Visit the Creatures menu to adopt some furry friends!</p>
           )}
         </div>
@@ -548,11 +554,17 @@ export default function App() {
           <Settings 
             onClose={handleCloseComponent} 
             onSaveSettings={(newSettings) => {
-              // Handle saving settings
               console.log('Saving settings:', newSettings);
             }}
-            onExportData={handleExportData}
-            onImportData={handleImportData}
+            onGameStateChange={handleGameStateChange}
+          />
+        )}
+        {activeComponent === 'creatureMerge' && (
+          <CreatureMerge
+            purchasedCreatures={purchasedCreatures}
+            purchasedEpicSkins={purchasedEpicSkins}
+            onMerge={handleCreatureMerge}
+            onClose={handleCloseComponent}
           />
         )}
       </main>

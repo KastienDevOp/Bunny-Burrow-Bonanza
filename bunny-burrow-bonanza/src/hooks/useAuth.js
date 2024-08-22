@@ -1,3 +1,4 @@
+// useAuth.js
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 
@@ -6,7 +7,6 @@ const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if there's a user in local storage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));

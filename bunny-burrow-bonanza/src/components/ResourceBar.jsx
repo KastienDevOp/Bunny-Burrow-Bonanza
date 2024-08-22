@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from '../components/ui/button';
+import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const ResourceCategory = ({ category, resources, emojis, onResourceClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const totalValue = Object.keys(resources).reduce((sum, key) => sum + (resources[key] || 0), 0);
+  const totalValue = Object.values(resources).reduce((sum, value) => sum + value, 0);
 
   return (
     <div className="bg-[#FFF5E6] rounded-lg p-2 mb-2">
@@ -22,16 +22,16 @@ const ResourceCategory = ({ category, resources, emojis, onResourceClick }) => {
       </Button>
       {isExpanded && (
         <div className="grid grid-cols-3 gap-2 mt-2">
-          {Object.keys(resources).map(resourceType => (
+          {Object.entries(resources).map(([resourceType, amount]) => (
             <Button
               key={resourceType}
               variant="ghost"
               onClick={() => onResourceClick(resourceType)}
               className="flex flex-col items-center p-1 text-[#8B4513] hover:bg-[#FFEFD5]"
             >
-              <span className="text-xl mb-1">{emojis[resourceType]}</span>
+              <span className="text-xl mb-1">{emojis[resourceType] || '🔹'}</span>
               <span className="capitalize text-xs">{resourceType.replace(/([A-Z])/g, ' $1').trim()}</span>
-              <span className="text-xs font-semibold">{Math.floor(resources[resourceType] || 0)}</span>
+              <span className="text-xs font-semibold">{Math.floor(amount)}</span>
             </Button>
           ))}
         </div>
@@ -67,7 +67,7 @@ const ResourceBar = ({ resources, onResourceClick }) => {
           <span className="text-3xl mr-2">🥕</span>
           <span className="font-bold text-lg text-[#8B4513]">Carrots</span>
         </div>
-        <span className="text-2xl font-bold text-[#8B4513]">{Math.floor(resources.carrots || 0)}</span>
+        <span className="text-2xl font-bold text-[#8B4513]">{Math.floor(resources.carrots)}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
@@ -75,7 +75,7 @@ const ResourceBar = ({ resources, onResourceClick }) => {
           <ResourceCategory
             key={category}
             category={category}
-            resources={Object.fromEntries(categoryResources.map(r => [r, resources[r]]))}
+            resources={Object.fromEntries(categoryResources.map(r => [r, resources[r] || 0]))}
             emojis={resourceEmoji}
             onResourceClick={onResourceClick}
           />

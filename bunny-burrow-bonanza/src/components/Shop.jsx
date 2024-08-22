@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 
 // Define shop categories and items
@@ -134,10 +134,16 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
   const [activeCategory, setActiveCategory] = useState('Seeds');
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState({});
+  const [localShopItems, setLocalShopItems] = useState(shopItems);
+
+  useEffect(() => {
+    setLocalShopItems(shopItems);
+  }, [shopItems]);
 
   const calculateCost = (item) => {
-    const count = shopItems[item.name]?.count || 0;
-    return Math.round(item.baseCost * Math.pow(item.costMultiplier, count));
+    const count = localShopItems[item.name]?.count || 0;
+    const cost = Math.round(item.baseCost * Math.pow(item.costMultiplier, count));
+    return isNaN(cost) || !isFinite(cost) ? item.baseCost : cost;
   };
 
   const filteredItems = SHOP_CATEGORIES[activeCategory].filter(item =>
@@ -185,6 +191,11 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
     }
   };
 
+  // Helper function to safely display numeric values
+  const safelyDisplayNumber = (value) => {
+    return typeof value === 'number' && isFinite(value) ? Math.floor(value).toString() : '0';
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-[#FFF8DC] p-6 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto fuzzy-border">
@@ -197,7 +208,7 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
             {Object.entries(resources).map(([resource, amount]) => (
               <div key={resource} className="flex justify-between items-center">
                 <span className="capitalize text-[#8B4513]">{resource}:</span>
-                <span className="font-semibold text-[#A0522D]">{Math.floor(amount)}</span>
+                <span className="font-semibold text-[#A0522D]">{safelyDisplayNumber(amount)}</span>
               </div>
             ))}
           </div>
@@ -231,7 +242,7 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => {
             const cost = calculateCost(item);
-            const count = shopItems[item.name]?.count || 0;
+            const count = localShopItems[item.name]?.count || 0;
             return (
               <div key={item.name} className="bg-[#FFF5E6] p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                 <div className="flex justify-between items-center mb-2">
@@ -243,39 +254,39 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
                     onClick={() => addToCart(item)}
                     className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9]"
                   >
-                    Add to Cart ({cost} 🥕)
+                    Add to Cart ({safelyDisplayNumber(cost)} 🥕)
                   </Button>
                 </div>
                 <p className="text-sm text-[#A0522D]">
                   +{item.productionIncrease.amount} {item.productionIncrease.resource} production
                 </p>
                 <span className="text-xs text-[#CD853F]">
-                  (Owned: {count})
+                  (Owned: {safelyDisplayNumber(count)})
                 </span>
 
                 {/* Shopping cart for the current item */}
                 {cart[item.name] > 0 && (
-                    <div className="mt-2 bg-[#FFEFD5] p-2 rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <span>{item.name} x{cart[item.name]}</span>
-                        <div>
-                          <Button
-                            variant="outline"
-                            onClick={() => removeFromCart(item.name)}
-                            className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] px-2 py-1 mr-2"
-                          >
-                            Remove
-                          </Button>
-                          <Button
-                            onClick={() => handlePurchase(item.name)}
-                            className="bg-[#8B4513] text-white hover:bg-[#A0522D]"
-                          >
-                            Purchase ({cart[item.name] * cost}                             🥕)
-                          </Button>
-                        </div>
+                  <div className="mt-2 bg-[#FFEFD5] p-2 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span>{item.name} x{cart[item.name]}</span>
+                      <div>
+                        <Button
+                          variant="outline"
+                          onClick={() => removeFromCart(item.name)}
+                          className="bg-[#FFE4B5] text-[#8B4513] hover:bg-[#FFDAB9] px-2 py-1 mr-2"
+                        >
+                          Remove
+                        </Button>
+                        <Button
+                          onClick={() => handlePurchase(item.name)}
+                          className="bg-[#8B4513] text-white hover:bg-[#A0522D]"
+                        >
+                          Purchase ({safelyDisplayNumber(cart[item.name] * cost)} 🥕)
+                        </Button>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -288,4 +299,3 @@ const Shop = ({ onClose, onPurchase, resources, shopItems }) => {
 };
 
 export default Shop;
-

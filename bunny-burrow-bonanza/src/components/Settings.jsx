@@ -1,6 +1,8 @@
+// Settings.jsx
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import useAuth from '../hooks/useAuth';
+import api from '../utils/api';
 
 const SETTINGS = {
   Audio: [
@@ -19,7 +21,7 @@ const SETTINGS = {
   ],
 };
 
-const Settings = ({ onClose, onSaveSettings, onExportData, onImportData }) => {
+const Settings = ({ onClose, onSaveSettings, onGameStateChange }) => {
   const [activeCategory, setActiveCategory] = useState('Audio');
   const [settingsState, setSettingsState] = useState(() => {
     const initialState = {};
@@ -49,6 +51,10 @@ const Settings = ({ onClose, onSaveSettings, onExportData, onImportData }) => {
       await login(username, password);
       setUsername('');
       setPassword('');
+      const gameState = await api.loadGameState(username);
+      if (gameState) {
+        onGameStateChange(gameState);
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -66,6 +72,35 @@ const Settings = ({ onClose, onSaveSettings, onExportData, onImportData }) => {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleExportData = async () => {
+    try {
+      await api.exportData(user.username);
+      alert('Data exported successfully!');
+    } catch (error) {
+      alert(`Failed to export data: ${error.message}`);
+    }
+  };
+
+  const handleImportData = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          await api.importData(user.username, e.target.result);
+          alert('Data imported successfully!');
+          const gameState = await api.loadGameState(user.username);
+          if (gameState) {
+            onGameStateChange(gameState);
+          }
+        } catch (error) {
+          alert(`Failed to import data: ${error.message}`);
+        }
+      };
+      reader.readAsText(file);
+    }
   };
 
   return (
@@ -112,23 +147,25 @@ const Settings = ({ onClose, onSaveSettings, onExportData, onImportData }) => {
         </div>
 
         {/* Data Export/Import Section */}
-        <div className="mb-6 p-4 bg-[#FFF5E6] rounded-lg">
-          <h3 className="text-xl font-semibold mb-2 text-[#8B4513]">Data Management</h3>
-          <div className="flex justify-between">
-            <Button onClick={onExportData} className="bg-[#DEB887] text-white hover:bg-[#D2691E]">
-              Export Data
-            </Button>
-            <label className="bg-[#DEB887] text-white hover:bg-[#D2691E] px-4 py-2 rounded-md cursor-pointer">
-              Import Data
-              <input
-                type="file"
-                accept=".json"
-                onChange={onImportData}
-                className="hidden"
-              />
-            </label>
+        {user && (
+          <div className="mb-6 p-4 bg-[#FFF5E6] rounded-lg">
+            <h3 className="text-xl font-semibold mb-2 text-[#8B4513]">Data Management</h3>
+            <div className="flex justify-between">
+              <Button onClick={handleExportData} className="bg-[#DEB887] text-white hover:bg-[#D2691E]">
+                Export Data
+              </Button>
+              <label className="bg-[#DEB887] text-white hover:bg-[#D2691E] px-4 py-2 rounded-md cursor-pointer">
+                Import Data
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportData}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Game Settings */}
         <div className="mb-4">

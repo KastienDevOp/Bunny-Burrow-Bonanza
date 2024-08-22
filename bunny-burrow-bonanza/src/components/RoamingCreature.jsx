@@ -1,5 +1,5 @@
-// RoamingCreature.jsx
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const CREATURE_EMOJIS = {
   'Common Bunny': '🐰',
@@ -8,9 +8,15 @@ const CREATURE_EMOJIS = {
   'Magic Hare': '🐇✨',
   'Golden Rabbit': '🐰✨',
   'Resource Raccoon': '🦝',
+  'EpicCommon Bunny': '👑🐰',
+  'EpicNutty Squirrel': '🤖🐿️',
+  'EpicBerry Fox': '🔥🦊',
+  'EpicMagic Hare': '🌟🐇',
+  'EpicGolden Rabbit': '💎🐰',
+  'EpicResource Raccoon': '🦾🦝',
 };
 
-const RoamingCreature = ({ type }) => {
+const RoamingCreature = ({ type, emoji }) => {
   const [position, setPosition] = useState({ x: Math.random() * 100, y: Math.random() * 100 });
   const [direction, setDirection] = useState({ x: Math.random() - 0.5, y: Math.random() - 0.5 });
 
@@ -48,17 +54,35 @@ const RoamingCreature = ({ type }) => {
     return () => clearInterval(changeDirectionInterval);
   }, []);
 
+  const isEpic = type.startsWith('Epic');
+
   return (
-    <div
-      className="absolute text-2xl transition-all duration-200 ease-in-out"
+    <motion.div
+      className={`absolute text-2xl transition-all duration-200 ease-in-out ${isEpic ? 'z-10' : ''}`}
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
         transform: `translate(-50%, -50%) scale(${0.5 + Math.random() * 0.5})`,
       }}
+      animate={{
+        x: position.x + '%',
+        y: position.y + '%',
+        rotate: Math.random() * 360,
+      }}
+      transition={{ type: 'spring', damping: 10, stiffness: 100 }}
     >
-      {CREATURE_EMOJIS[type]}
-    </div>
+      {isEpic ? (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', damping: 10, stiffness: 100 }}
+        >
+          {emoji}
+        </motion.div>
+      ) : (
+        emoji
+      )}
+    </motion.div>
   );
 };
 
